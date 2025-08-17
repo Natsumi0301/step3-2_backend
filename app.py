@@ -78,7 +78,7 @@ def release_lantan(
 
 # --- 認証API ---
 
-@auth_router.post("/register", response_model=schemas.Token)
+@auth_router.post("/register", response_model=schemas.LoginResponse)
 def register(register_data: schemas.RegisterRequest, db: Session = Depends(get_db)):
     if crud.get_user_by_email(db, email=register_data.email):
         raise HTTPException(status_code=400, detail="このメールアドレスは既に使用されています")
@@ -87,20 +87,45 @@ def register(register_data: schemas.RegisterRequest, db: Session = Depends(get_d
     new_user = crud.create_user(db, user_data=register_data, hashed_password=hashed_password)
     
     access_token = auth.create_access_token(data={"sub": new_user.email})
-    return {"access_token": access_token, "token_type": "bearer"}
+    
+    # login と同じ形式で、トークンとユーザー情報を返す
+    return {
+        "token": access_token,
+        "token_type": "bearer",
+        "user": {
+            "id": new_user.user_id,
+            "username": new_user.name,
+            "email": new_user.email,
+            "name": new_user.name
+        }
+    }
 
-@auth_router.post("/login", response_model=schemas.Token)
+@auth_router.post("/login") # response_modelを後述のLoginResponseに変更
 def login(
-    username: str = Form(...),
-    password: str = Form(...),
+    login_data: schemas.LoginRequest, # Form(...) から LoginRequestモデルに変更
     db: Session = Depends(get_db)
 ):
-    user = crud.get_user_by_email(db, email=username)
-    if not user or user.password != hashlib.sha256(password.encode()).hexdigest():
-        raise HTTPException(status_code=401, detail="メールアドレスまたはパスワードが間違っています")
+    # login_data.email でデータにアクセス
+    user = crud.get_user_by_email(db, email=login_data.email) 
+    if not user or user.password != hashlib.sha256(login_data.password.encode()).hexdigest():
+        raise HTTPException(
+            status_code=401, 
+            detail="メールアドレスまたはパスワードが間違っています"
+        )
 
     access_token = auth.create_access_token(data={"sub": user.email})
-    return {"access_token": access_token, "token_type": "bearer"}
+    
+    # フロントエンドが期待するユーザー情報も一緒に返す
+    return {
+        "token": access_token,
+        "token_type": "bearer",
+        "user": {
+            "id": user.user_id,
+            "username": user.name, # jsxの'username'キーに合わせる
+            "email": user.email,
+            "name": user.name
+        }
+    }
 
 app.include_router(main_api_router)
 app.include_router(auth_router)
