@@ -100,7 +100,7 @@ def register(register_data: schemas.RegisterRequest, db: Session = Depends(get_d
         }
     }
 
-@auth_router.post("/login") # response_modelを後述のLoginResponseに変更
+@auth_router.post("/login", response_model=schemas.LoginResponse) # response_modelを後述のLoginResponseに変更
 def login(
     login_data: schemas.LoginRequest, # Form(...) から LoginRequestモデルに変更
     db: Session = Depends(get_db)

@@ -50,6 +50,12 @@ class Token(BaseModel):
     access_token: str
     token_type: str
 
+# おかぴー追記（8/18）
+class LoginResponse(BaseModel):
+    token: str
+    token_type: str
+    user: dict
+
 class QuestionsResponse(BaseModel):
     questions: List[Question]
 
