@@ -36,14 +36,18 @@ def create_user(db: Session, user_data: schemas.RegisterRequest, hashed_password
 
 def get_questions_from_db(db: Session) -> List[models.Question]:
     """DBから各カテゴリの質問をランダムに1問ずつ取得する"""
-    subquery = db.query(
-        models.Question,
-        func.row_number().over(
-            partition_by=models.Question.category_id,
-            order_by=func.rand()
-        ).label('row_num')
-    ).subquery()
-    questions = db.query(subquery).filter(subquery.c.row_num == 1).all()
+    # 各カテゴリから1問ずつ取得するために、カテゴリごとにループ処理
+    categories = db.query(models.QuestionCategory).all()
+    questions = []
+    
+    for category in categories:
+        question = db.query(models.Question).filter(
+            models.Question.category_id == category.category_id
+        ).order_by(func.rand()).first()
+        
+        if question:
+            questions.append(question)
+            
     return questions
 
 def get_weekly_records_from_db(db: Session, user_id: int) -> List[models.DailyRecord]:
