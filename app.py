@@ -56,6 +56,19 @@ def get_questions(db: Session = Depends(get_db)):
     questions_from_db = crud.get_questions_from_db(db)
     return schemas.QuestionsResponse(questions=questions_from_db)
 
+# おかぴー追加（8/21）
+@main_api_router.post("/recommendations", response_model=List[schemas.RecommendationResponse])
+def get_recommendations(
+    request: schemas.RecommendationRequest,
+    db: Session = Depends(get_db),
+):
+    """スコアに基づくおすすめアクションを取得する"""
+    recommendations = crud.get_random_recommendation_by_color(db, request.score)
+    if not recommendations:
+        raise HTTPException(status_code=404, detail="No recommendations found")
+    
+    return recommendations
+
 # 【新規作成】ランタンをリリースするAPI
 @main_api_router.post("/lantan/release", response_model=schemas.LantanReleaseResponse)
 def release_lantan(

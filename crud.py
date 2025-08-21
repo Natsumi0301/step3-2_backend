@@ -6,13 +6,13 @@ import math
 import models
 import schemas
 
-def get_random_recommendation_by_color(db: Session, color_id: int) -> Optional[models.Recommendation]:
+def get_random_recommendation_by_color(db: Session, color_id: int) -> List[models.Recommendation]:
     """
-    指定されたcolor_idに紐づくレコメンドの中から、ランダムに1つを取得する。
+    指定されたcolor_idに紐づくレコメンドの中から、ランダムに2つを取得する。
     """
     return db.query(models.Recommendation).filter(
         models.Recommendation.color_id == color_id
-    ).order_by(func.rand()).first()
+    ).order_by(func.rand()).limit(2).all()
 
 
 def get_user_by_email(db: Session, email: str) -> Optional[models.User]:
@@ -63,8 +63,9 @@ def save_daily_record_to_db(db: Session, user_id: int, answers: List[schemas.Ans
     """日々の記録と回答をDBに保存する"""
     today = datetime.now().date()
     
-    recommendation = get_random_recommendation_by_color(db, color_id=color_id)
-    recommend_id = recommendation.recommend_id if recommendation else None
+    # 67,68行目はもしかしたら不要？
+    recommendations = get_random_recommendation_by_color(db, color_id=color_id)
+    recommend_id = recommendations[0].recommend_id if recommendations else None
 
     new_record = models.DailyRecord(
         user_id=user_id,
