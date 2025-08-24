@@ -9,7 +9,7 @@ class QuestionCategory(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 class Color(BaseModel):
-    color_id: int
+    lantan_color: int
     color_name: str | None = None
     model_config = ConfigDict(from_attributes=True)
 
@@ -53,28 +53,32 @@ class Token(BaseModel):
     access_token: str
     token_type: str
 
-# おかぴー追記（8/18）
+class QuestionsResponse(BaseModel):
+    questions: List[Question]
+
+class UserInLoginResponse(BaseModel):
+    id: int
+    username: str
+    email: str
+    name: str
+
 class LoginResponse(BaseModel):
     token: str
-    token_type: str
-    user: dict
+    token_type: str = "bearer"
+    user: UserInLoginResponse
 
-#　おかぴー追記　64行目まで（8/21）
 class RecommendationResponse(BaseModel):
     recommend_id: int
     action_recommend: str
     recommend_detail: str
     color_id: int
 
-class QuestionsResponse(BaseModel):
-    questions: List[Question]
-
 # 【新規作成】Lantanモデル
 class Lantan(BaseModel):
     lantan_id: int
     released_at: datetime
     user_id: int
-    color_id: int
+    lantan_color: int
     model_config = ConfigDict(from_attributes=True)
 
 # 【新規作成】Lantanリリース時のレスポンスモデル
