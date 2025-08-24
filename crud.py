@@ -12,7 +12,7 @@ def get_random_recommendation_by_color(db: Session, color_id: int) -> Optional[m
     """
     return db.query(models.Recommendation).filter(
         models.Recommendation.color_id == color_id
-    ).order_by(func.rand()).first()
+    ).order_by(func.random()).first()
 
 
 def get_user_by_email(db: Session, email: str) -> Optional[models.User]:
@@ -40,7 +40,7 @@ def get_questions_from_db(db: Session) -> List[models.Question]:
         models.Question,
         func.row_number().over(
             partition_by=models.Question.category_id,
-            order_by=func.rand()
+            order_by=func.random()
         ).label('row_num')
     ).subquery()
     questions = db.query(subquery).filter(subquery.c.row_num == 1).all()
