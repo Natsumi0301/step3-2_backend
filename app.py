@@ -56,18 +56,27 @@ def get_questions(db: Session = Depends(get_db)):
     questions_from_db = crud.get_questions_from_db(db)
     return schemas.QuestionsResponse(questions=questions_from_db)
 
-# おかぴー追加（8/21）
+
+#レコメンデーション
 @main_api_router.post("/recommendations", response_model=List[schemas.RecommendationResponse])
 def get_recommendations(
     request: schemas.RecommendationRequest,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db)
 ):
-    """スコアに基づくおすすめアクションを取得する"""
-    recommendations = crud.get_random_recommendation_by_color(db, request.score)
+    """
+    スコア（color_id）に基づいてレコメンドをランダムに2つ取得する
+    """
+    # 新しく作成した、件数指定でランダム取得する関数を呼び出す
+    recommendations = crud.get_random_recommendations_by_color_id(
+        db, color_id=request.score, limit=2
+    )
+
     if not recommendations:
-        raise HTTPException(status_code=404, detail="No recommendations found")
-    
+        # 該当するレコメンドがない場合は空のリストを返す
+        return []
+        
     return recommendations
+
 
 # 【新規作成】ランタンをリリースするAPI
 @main_api_router.post("/lantan/release", response_model=schemas.LantanReleaseResponse)
@@ -113,7 +122,7 @@ def register(register_data: schemas.RegisterRequest, db: Session = Depends(get_d
         }
     }
 
-@auth_router.post("/login", response_model=schemas.LoginResponse) # response_modelを後述のLoginResponseに変更
+@auth_router.post("/login") # response_modelを後述のLoginResponseに変更
 def login(
     login_data: schemas.LoginRequest, # Form(...) から LoginRequestモデルに変更
     db: Session = Depends(get_db)
