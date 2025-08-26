@@ -37,9 +37,10 @@ def get_questions_from_db(db: Session) -> List[models.Question]:
             order_by=func.random()
         ).label('row_num')
     ).subquery()
-    questions = db.query(subquery).filter(subquery.c.row_num == 1).all()
-    # SQLAlchemyのRowオブジェクトからQuestionモデルのインスタンスを正しく取り出す
-    return [q[0] for q in questions]
+    questions = db.query(subquery.c.question_id,
+    subquery.c.question_text,
+    subquery.c.category_id).filter(subquery.c.row_num == 1).all()
+    return [db.query(models.Question).filter(models.Question.question_id == q[0]).first() for q in questions]
 
 def get_random_recommendations_by_color_id(db: Session, color_id: int, limit: int) -> List[models.Recommendation]:
     # rand()からrandom()に統一
