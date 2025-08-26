@@ -138,5 +138,5 @@ def login(
         }
     }
 
-app.include_router(main_api_router, prefix="/api") # prefixを追加してエンドポイントを/api/以下に統一
+app.include_router(main_api_router) 
 app.include_router(auth_router)
