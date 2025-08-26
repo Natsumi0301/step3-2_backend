@@ -44,6 +44,7 @@ class AnswerData(BaseModel):
 
 class MoodDataForSave(BaseModel):
     answers: List[AnswerData]
+    check_in_date: date # この行が重要です
 
 class RecommendationRequest(BaseModel):
     score: int
@@ -85,3 +86,4 @@ class Lantan(BaseModel):
 class LantanReleaseResponse(BaseModel):
     message: str
     lantan: Lantan
+    
