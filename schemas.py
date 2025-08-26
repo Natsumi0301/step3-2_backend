@@ -86,3 +86,4 @@ class Lantan(BaseModel):
 class LantanReleaseResponse(BaseModel):
     message: str
     lantan: Lantan
+    
