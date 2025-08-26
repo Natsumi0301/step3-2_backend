@@ -50,10 +50,12 @@ def get_random_recommendations_by_color_id(db: Session, color_id: int, limit: in
 
 def get_weekly_records_from_db(db: Session, user_id: int) -> List[models.DailyRecord]:
     today = datetime.now().date()
-    one_week_ago = today - timedelta(days=7)
+    # 今週の月曜日を計算（0=月曜日、6=日曜日）
+    days_since_monday = today.weekday()
+    week_start = today - timedelta(days=days_since_monday)
     return db.query(models.DailyRecord).filter(
         models.DailyRecord.user_id == user_id,
-        models.DailyRecord.check_in_date >= one_week_ago
+        models.DailyRecord.check_in_date >= week_start
     ).order_by(models.DailyRecord.check_in_date).all()
 
 # ▼▼▼【ここから全面的に修正】▼▼▼
